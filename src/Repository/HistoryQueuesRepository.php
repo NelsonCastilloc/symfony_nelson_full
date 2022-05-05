@@ -64,7 +64,8 @@ class HistoryQueuesRepository extends ServiceEntityRepository
     public function getListByQueue() {
         $query = "
             SELECT 	hq.customer_id , hq.customer_name , hq.queue_number 
-            FROM 	history_queues hq ";
+            FROM 	history_queues hq
+            WHERE   hq.attention_start IS NULL ";
         $res = $this->getEntityManager()->getConnection()->executeQuery($query)->fetchAllAssociative();
         return $res;
     }

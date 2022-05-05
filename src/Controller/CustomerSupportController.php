@@ -17,8 +17,8 @@ class CustomerSupportController extends AbstractController
      */
     public function CustomerSupportController(ManagerRegistry $em, Request $request): Response
     {
+        $this->UpdateServed($em);
         $list = $em->getRepository( HistoryQueues::class)->getListByQueue();
-        
         return $this->render('customer_support/index.html.twig', [
             'list' => $list,
         ]);
@@ -30,38 +30,34 @@ class CustomerSupportController extends AbstractController
      */
     public function CustomerSupportCreate(ManagerRegistry $em, Request $request)
     {   
+        $this->UpdateServed($em);
 
         $c_id = $request->get('customer_id');
         $c_name = $request->get('customer_name');
-        $dt = new \DateTime();
-        $dt->setTimezone(new \DateTimeZone('-0400'));
+        if(strlen($c_id)>0 && strlen($c_name)>0){
 
-        //$em = $em->getManager();
-        $updateServed = $this->UpdateServed($em);
-        dump($updateServed);die;
-        $newCustomer = new HistoryQueues();
-        $newCustomer->setCustomerId($c_id);
-        $newCustomer->setCustomerName($c_name);
-        $newCustomer->setAdmissionDate($dt);
-
-        $totalQtime = $em->getRepository( HistoryQueues::class)->getTotalQueueTime();
-        if (!is_array($totalQtime)) {
-            echo "Aún no hay clientes en cola";
-            $newCustomer->setQueueNumber(1);
-        }else{
-            if ($totalQtime['total_time_c1'] < $totalQtime['total_time_c2']) {
-                echo "Se asigna a la cola 1";
+            $dt = new \DateTime();
+            $dt->setTimezone(new \DateTimeZone('-0400'));
+            $newCustomer = new HistoryQueues();
+            $newCustomer->setCustomerId($c_id);
+            $newCustomer->setCustomerName($c_name);
+            $newCustomer->setAdmissionDate($dt);
+            $totalQtime = $em->getRepository( HistoryQueues::class)->getTotalQueueTime();
+            if (!is_array($totalQtime)) {
                 $newCustomer->setQueueNumber(1);
             }else{
-                echo "Se asigna a la cola 2";
-                $newCustomer->setQueueNumber(2);
+                if ($totalQtime['total_time_c1'] < $totalQtime['total_time_c2']) {
+                    $newCustomer->setQueueNumber(1);
+                }else{
+                    $newCustomer->setQueueNumber(2);
+                }
             }
+            $em = $em->getManager();
+            $em->persist($newCustomer);
+            $em->flush();
+
         }
         
-        $em = $em->getManager();
-        $em->persist($newCustomer);
-        $em->flush();
-
         return $this->redirectToRoute('customer_support');
         
     }
@@ -69,16 +65,14 @@ class CustomerSupportController extends AbstractController
     public function UpdateServed($em){
 
         $em = $em->getManager();
-
         for ($i=0; $i < 2; $i++) { 
             if ($i == 0) {
                 $queue = 1;
-                $timeServe = 1800;
+                $timeServe = 60;
             }else{
                 $queue = 2;
-                $timeServe = 2400;
+                $timeServe = 180;
             }
-
             $addNextToServe = false;
             $totalQtime = $em->getRepository( HistoryQueues::class)->getInCareProcess($queue);
             if (count($totalQtime) > 0) {
@@ -94,19 +88,16 @@ class CustomerSupportController extends AbstractController
             }
             if ($addNextToServe) {
                 $nextToServe = $em->getRepository( HistoryQueues::class)->getNextToServed($queue);
-                //dump($nextToServe);
-                $customer = $em->getRepository( HistoryQueues::class)->findOneBy(["id" => $nextToServe[0]['id']]);
-                //dump($customer->getCustomerName());
-                $dt = new \DateTime();
-                $dt->setTimezone(new \DateTimeZone('-0400'));
-                $customer->setAttentionStart($dt);
-                //dump($customer);
-                $em->persist($customer);
-                $em->flush();
+                if (count($nextToServe) > 0) {
+                    $customer = $em->getRepository( HistoryQueues::class)->findOneBy(["id" => $nextToServe[0]['id']]);
+                    $dt = new \DateTime();
+                    $dt->setTimezone(new \DateTimeZone('-0400'));
+                    $customer->setAttentionStart($dt);
+                    $em->persist($customer);
+                    $em->flush();
+                }
             }
-
         }
-        
         return 0;
     }
 
