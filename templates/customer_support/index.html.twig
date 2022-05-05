@@ -1,0 +1,88 @@
+{% extends './base.html.twig' %}
+
+{% block title %}Atención al Cliente{% endblock %}
+
+{% block body %}
+<hr>
+<br>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+        <div class="col-8">
+            <form class="row gy-2 gx-3 align-items-center" name="customer_data" method="post" action="{{path('customer_support_create')}}" >
+                <div class="col-auto">
+                    <label class="visually-hidden" for="autoSizingInput">ID</label>
+                    <input type="text" class="form-control" id="customer_id" placeholder="ID" name="customer_id">
+                </div>
+                <div class="col-auto">
+                    <label class="visually-hidden" for="autoSizingInput">Nombre</label>
+                    <input type="text" class="form-control" id="customer_name" placeholder="Nombre" name="customer_name">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-4">
+            <h5>Por favor, registrese para ser antendido</h5>
+        </div>
+    </div>
+    
+
+
+  </div>
+</div>
+<br>
+<br>
+<h5 class="card-title">Cola 1</h5>
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+        <div class="col">
+            <div class="container px-1">
+                <div class="row gx-5">
+                    {% for item in list %}
+                        {% if item.queue_number == 1 %}
+                            <div class="col-2">
+                                <div class="p-3 border bg-light text-center">
+                                    <p><b>{{ item.customer_id }}</b></p>
+                                    <p>{{ item.customer_name }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<br>
+<h5 class="card-title">Cola 2</h5>
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+        <div class="col">
+            <div class="container px-1">
+                <div class="row gx-5">
+                    {% for item in list %}
+                        {% if item.queue_number == 2 %}
+                            <div class="col-2">
+                                <div class="p-3 border bg-light text-center">
+                                    <p><b>{{ item.customer_id }}</b></p>
+                                    <p>{{ item.customer_name }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
