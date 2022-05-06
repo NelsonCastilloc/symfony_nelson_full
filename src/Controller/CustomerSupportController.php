@@ -11,27 +11,28 @@ use App\Entity\HistoryQueues;
 
 class CustomerSupportController extends AbstractController
 {
-    
+    public function __construct(private ManagerRegistry $doctrine) {}
+
     /**
      * @Route("/customer/support",name="customer_support")
      */
-    public function CustomerSupportController(ManagerRegistry $em, Request $request): Response
+    public function CustomerSupportController(Request $request): Response
     {
-        $this->UpdateServed($em);
-        $list = $em->getRepository( HistoryQueues::class)->getListByQueue();
+        $this->UpdateServed();
+        $mr = $this->doctrine->getManager();
+        $list = $mr->getRepository( HistoryQueues::class)->getListByQueue();
         return $this->render('customer_support/index.html.twig', [
             'list' => $list,
         ]);
     }
 
-
     /**
      * @Route("/customer/support/create", name="customer_support_create")
      */
-    public function CustomerSupportCreate(ManagerRegistry $em, Request $request)
+    public function CustomerSupportCreate(Request $request)
     {   
-        $this->UpdateServed($em);
-
+        $this->UpdateServed();
+        $mr = $this->doctrine->getManager();
         $c_id = $request->get('customer_id');
         $c_name = $request->get('customer_name');
         if(strlen($c_id)>0 && strlen($c_name)>0){
@@ -42,7 +43,7 @@ class CustomerSupportController extends AbstractController
             $newCustomer->setCustomerId($c_id);
             $newCustomer->setCustomerName($c_name);
             $newCustomer->setAdmissionDate($dt);
-            $totalQtime = $em->getRepository( HistoryQueues::class)->getTotalQueueTime();
+            $totalQtime = $mr->getRepository( HistoryQueues::class)->getTotalQueueTime();
             if (!is_array($totalQtime)) {
                 $newCustomer->setQueueNumber(1);
             }else{
@@ -52,19 +53,16 @@ class CustomerSupportController extends AbstractController
                     $newCustomer->setQueueNumber(2);
                 }
             }
-            $em = $em->getManager();
-            $em->persist($newCustomer);
-            $em->flush();
-
+            $mr->persist($newCustomer);
+            $mr->flush();
         }
-        
         return $this->redirectToRoute('customer_support');
-        
     }
 
-    public function UpdateServed($em){
 
-        $em = $em->getManager();
+    public function UpdateServed()
+    {
+        $mr = $this->doctrine->getManager();
         for ($i=0; $i < 2; $i++) { 
             if ($i == 0) {
                 $queue = 1;
@@ -74,27 +72,26 @@ class CustomerSupportController extends AbstractController
                 $timeServe = 180;
             }
             $addNextToServe = false;
-            $inCareProcess = $em->getRepository( HistoryQueues::class)->getInCareProcess($queue);
+            $inCareProcess = $mr->getRepository( HistoryQueues::class)->getInCareProcess($queue);
             if (count($inCareProcess) > 0) {
                 if ($inCareProcess[0]['elapsed_in_seconds'] > $timeServe) {
                     $inCareProcess = $inCareProcess[0];
-                    $customer = $em->getRepository( HistoryQueues::class)->findOneBy(["id" => $inCareProcess['id']]);
-                    $em->remove($customer);
-                    $em->flush();
+                    $customer = $mr->getRepository( HistoryQueues::class)->findOneBy(["id" => $inCareProcess['id']]);
+                    $mr->remove($customer);
+                    $mr->flush();
                     $addNextToServe = true;
                 }
             }else{
                 $addNextToServe = true;
             }
             if ($addNextToServe) {
-                $nextToServe = $em->getRepository( HistoryQueues::class)->getNextToServed($queue);
+                $nextToServe = $mr->getRepository( HistoryQueues::class)->getNextToServed($queue);
                 if (count($nextToServe) > 0) {
-                    $customer = $em->getRepository( HistoryQueues::class)->findOneBy(["id" => $nextToServe[0]['id']]);
+                    $customer = $mr->getRepository( HistoryQueues::class)->findOneBy(["id" => $nextToServe[0]['id']]);
                     $dt = new \DateTime();
                     $dt->setTimezone(new \DateTimeZone('-0400'));
                     $customer->setAttentionStart($dt);
-                    //$em->persist($customer);
-                    $em->flush();
+                    $mr->flush();
                 }
             }
         }

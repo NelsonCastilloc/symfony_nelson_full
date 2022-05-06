@@ -39,15 +39,33 @@
 <div class="card">
   <div class="card-body">
     <div class="row">
-        <div class="col">
+        <div class="col-10">
             <div class="container px-1">
                 <div class="row gx-5">
                     {% for item in list %}
-                        {% if item.queue_number == 1 %}
+                        {% if item.queue_number == 1 and item.attention_start is null %}
                             <div class="col-2">
-                                <div class="p-3 border bg-light text-center">
+                                <div class="p-1 border bg-light text-center">
                                     <p><b>{{ item.customer_id }}</b></p>
                                     <p>{{ item.customer_name }}</p>
+                                    <span style="font-size: 12px; font-weight: 300;">Por atender</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="container px-1">
+                <div class="row gx-5">
+                    {% for item in list %}
+                        {% if item.queue_number == 1 and item.attention_start is not null %}
+                            <div class="col">
+                                <div class="p-1 border bg-info text-center">
+                                    <p><b>{{ item.customer_id }}</b></p>
+                                    <p>{{ item.customer_name }}</p>
+                                    <span style="font-size: 12px;">Atendiendo</span>
                                 </div>
                             </div>
                         {% endif %}
@@ -64,15 +82,33 @@
 <div class="card">
   <div class="card-body">
     <div class="row">
-        <div class="col">
+        <div class="col-10">
             <div class="container px-1">
                 <div class="row gx-5">
                     {% for item in list %}
-                        {% if item.queue_number == 2 %}
+                        {% if item.queue_number == 2 and item.attention_start is null %}
                             <div class="col-2">
-                                <div class="p-3 border bg-light text-center">
+                                <div class="p-1 border bg-light text-center">
                                     <p><b>{{ item.customer_id }}</b></p>
                                     <p>{{ item.customer_name }}</p>
+                                    <span style="font-size: 12px; font-weight: 300;">Por atender</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="container px-1">
+                <div class="row gx-5">
+                    {% for item in list %}
+                        {% if item.queue_number == 2 and item.attention_start is not null %}
+                            <div class="col">
+                                <div class="p-1 border bg-info text-center">
+                                    <p><b>{{ item.customer_id }}</b></p>
+                                    <p>{{ item.customer_name }}</p>
+                                    <span style="font-size: 12px;">Atendiendo</span>
                                 </div>
                             </div>
                         {% endif %}
