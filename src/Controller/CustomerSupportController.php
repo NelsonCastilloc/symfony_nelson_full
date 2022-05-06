@@ -74,11 +74,11 @@ class CustomerSupportController extends AbstractController
                 $timeServe = 180;
             }
             $addNextToServe = false;
-            $totalQtime = $em->getRepository( HistoryQueues::class)->getInCareProcess($queue);
-            if (count($totalQtime) > 0) {
-                if ($totalQtime[0]['elapsed_in_seconds'] > $timeServe) {
-                    $totalQtime = $totalQtime[0];
-                    $customer = $em->getRepository( HistoryQueues::class)->findOneBy(["id" => $totalQtime['id']]);
+            $inCareProcess = $em->getRepository( HistoryQueues::class)->getInCareProcess($queue);
+            if (count($inCareProcess) > 0) {
+                if ($inCareProcess[0]['elapsed_in_seconds'] > $timeServe) {
+                    $inCareProcess = $inCareProcess[0];
+                    $customer = $em->getRepository( HistoryQueues::class)->findOneBy(["id" => $inCareProcess['id']]);
                     $em->remove($customer);
                     $em->flush();
                     $addNextToServe = true;
@@ -93,7 +93,7 @@ class CustomerSupportController extends AbstractController
                     $dt = new \DateTime();
                     $dt->setTimezone(new \DateTimeZone('-0400'));
                     $customer->setAttentionStart($dt);
-                    $em->persist($customer);
+                    //$em->persist($customer);
                     $em->flush();
                 }
             }

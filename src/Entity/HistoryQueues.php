@@ -97,12 +97,12 @@ class HistoryQueues
 
     public function getAttentionStart(): ?\DateTimeInterface
     {
-        return $this->attetionStart;
+        return $this->attentionStart;
     }
 
-    public function setAttentionStart(?\DateTimeInterface $attetionStart): self
+    public function setAttentionStart(?\DateTimeInterface $attentionStart): self
     {
-        $this->attetionStart = $attetionStart;
+        $this->attentionStart = $attentionStart;
 
         return $this;
     }
