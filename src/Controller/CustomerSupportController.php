@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -59,14 +60,17 @@ class CustomerSupportController extends AbstractController
         return $this->redirectToRoute('customer_support');
     }
 
-
+    /**
+     * @Route("/customer/support/update-served", name="customer_support_update_served")
+     */
     public function UpdateServed()
     {
         $mr = $this->doctrine->getManager();
+        $refreshView = false;
         for ($i=0; $i < 2; $i++) { 
             if ($i == 0) {
                 $queue = 1;
-                $timeServe = 60;
+                $timeServe = 120;
             }else{
                 $queue = 2;
                 $timeServe = 180;
@@ -92,10 +96,16 @@ class CustomerSupportController extends AbstractController
                     $dt->setTimezone(new \DateTimeZone('-0400'));
                     $customer->setAttentionStart($dt);
                     $mr->flush();
+                    $refreshView = true;
                 }
             }
         }
-        return 0;
+        $response = new JsonResponse();
+        $response->setData([
+            "status" => $refreshView,
+        ]);
+        
+        return $response;
     }
 
 
